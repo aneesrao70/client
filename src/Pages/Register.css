@@ -1,0 +1,22 @@
+.inline-div {
+    display: inline-block;
+  }
+
+  .inline {
+    width: 290px;
+    display: flex;
+    flex-direction: row;
+  }
+  .inline-div:first-child {
+    width: 15px;
+    margin-right: 5px;
+  }
+
+  span,p {
+    left: 50px;
+    color: red;
+    font-size: small;
+    margin: -13px 0 -12px 0;
+    padding: none;
+
+}
