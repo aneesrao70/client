@@ -1,6 +1,7 @@
 import React  , {useState , useEffect} from 'react';
 import api from '../api';
 import './SaleRecord.css';
+import { Bars } from  'react-loader-spinner'
 import { AiFillCaretLeft , AiFillCaretRight , AiFillDelete } from 'react-icons/ai';
 
 
@@ -15,6 +16,7 @@ const SaleRecord = () => {
   const [filterParam, setFilterParam] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [isLoading , setIsLoading] = useState(true);
 
 
   const removeFilters = () => {
@@ -72,6 +74,7 @@ const SaleRecord = () => {
   },[prodName,startDate,endDate,filterParam])
 
   const fetchData = async()=> {
+    setIsLoading(true);
     const token = localStorage.getItem('token'); 
     const userId = localStorage.getItem('userId');
     const headers = {
@@ -87,12 +90,15 @@ const SaleRecord = () => {
         const result = response.data.sales;
         const SalesData = result.map((product) => product);
         setSaleDet(SalesData)
+        setIsLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error);
+        setIsLoading(false);
       }
     }
 
       const handleDelete = async (saleId) => {
+        setIsLoading(true)
         const token = localStorage.getItem('token'); 
         const userId = localStorage.getItem('userId');
         const headers = {
@@ -107,8 +113,10 @@ const SaleRecord = () => {
           console.log('Sale Deleted:', response)
           const updatedItems = saleDet.filter((sale) => sale._id !== saleId);
           setSaleDet(updatedItems); 
+          setIsLoading(false);
         } catch (error) {
           console.error('Error deleting data:', error);
+          setIsLoading(false);
         }
       }
 
@@ -128,78 +136,98 @@ const currentItems = saleDet.slice(indexOfFirstItem, indexOfLastItem);
 console.log(currentItems)
 
   return (
-    <div className='Table-container'>
-        <h1>Sales Details</h1>
-        <div className='Table-input-container'>
-          <div className='input-btn'>
-            <input style={{paddingLeft:'0' , textAlign:'center' , fontSize: '15px' , width: '180px'}} className='SRinput' type="text" name = 'prodName' value = {prodName} placeholder = 'Search by Product' onChange={(e)=>setProdName(e.target.value)}></input>
-            <button style ={{width: '120px'}} onClick = {lastSevenDaysHandler}>Last 7 Days</button>
-          </div>
-          <div className='input-btn'>
-            <input style={{paddingLeft:'0' , textAlign:'center' , fontSize: '15px' , width: '180px'}} className='SRinput' type="text" name = 'startDate' value = {startDate} placeholder ='Starting date (yyyy-mm-dd)' onChange={(e)=>setStartDate(e.target.value)}></input>
-            <button style ={{width: '120px'}} onClick = {lastFifteenDaysHandler}>Last 15 Days</button>
-          </div>
-          <div className='input-btn'>
-            <input style={{paddingLeft:'0' , textAlign:'center' , fontSize: '15px' , width: '180px'}} className='SRinput' type="text" name = 'endDate' value = {endDate} placeholder ='Ending date (yyyy-mm-dd)' onChange={(e)=>setEndDate(e.target.value)}></input>
-            <button style ={{width: '120px'}} onClick = {lastMonthHandler}>Last 30 Days</button>
-          </div>
+    <div>
+      { isLoading && (<div className = 'loader-overlay'>
+      <div className='loader'>
+        <Bars
+          height="60"
+          width="60"
+          color="blue"
+          ariaLabel="bars-loading"
+          wrapperStyle={{}}
+          wrapperClass=""
+          visible={true}
+        />
+        </div>
+      </div>)}
+      <div className = {`Table-container  ${isLoading ? 'loading' : ''}`}>
+      <h1>Sales Details</h1>
+      <div className='Table-input-container'>
+        <div className='input-btn'>
+          <input style={{paddingLeft:'0' , textAlign:'center' , fontSize: '15px' , width: '180px'}} className='SRinput' type="text" name = 'prodName' value = {prodName} placeholder = 'Search by Product' onChange={(e)=>setProdName(e.target.value)}></input>
+          <button style ={{width: '120px'}} onClick = {lastSevenDaysHandler}>Last 7 Days</button>
+        </div>
+        <div className='input-btn'>
+          <input style={{paddingLeft:'0' , textAlign:'center' , fontSize: '15px' , width: '180px'}} className='SRinput' type="text" name = 'startDate' value = {startDate} placeholder ='Starting date (yyyy-mm-dd)' onChange={(e)=>setStartDate(e.target.value)}></input>
+          <button style ={{width: '120px'}} onClick = {lastFifteenDaysHandler}>Last 15 Days</button>
+        </div>
+        <div className='input-btn'>
+          <input style={{paddingLeft:'0' , textAlign:'center' , fontSize: '15px' , width: '180px'}} className='SRinput' type="text" name = 'endDate' value = {endDate} placeholder ='Ending date (yyyy-mm-dd)' onChange={(e)=>setEndDate(e.target.value)}></input>
+          <button style ={{width: '120px'}} onClick = {lastMonthHandler}>Last 30 Days</button>
+        </div>
 
-        </div>
-        <div className='Table-btn-container'>  
-          <button style ={{width: '140px'}} onClick={removeFilters}>Remove Filters</button>  
-          
-            <select value={filterParam}  onChange={(e)=>setFilterParam(e.target.value)} className='sort-select'>
-              <option value=''  key=''>Sort By</option>
-              <option value='AscendingLetter'  key='1' >Product (A-Z)</option>
-              <option value='DescendingLetter'  key='2' >Product (Z-A)</option>
-              <option value='NewestOnTop'  key='3'  >Date (Newest On Top)</option>
-              <option value='OldestOnTop'  key='4'  >Date (Oldest On Top)</option>
-            </select>
-          
-        </div>
-        <table>
-            <thead>
-            <tr>
-                <th>Product</th>
-                <th>Qty</th>
-                <th>Price</th>
-                <th>Disc</th>
-                <th>Total</th>
-                <th>Date</th>
-                <th>Delete</th>
+      </div>
+      <div className='Table-btn-container'>  
+        <button style ={{width: '140px'}} onClick={removeFilters}>Remove Filters</button>  
+        
+          <select value={filterParam}  onChange={(e)=>setFilterParam(e.target.value)} className='sort-select'>
+            <option value=''  key=''>Sort By</option>
+            <option value='AscendingLetter'  key='1' >Product (A-Z)</option>
+            <option value='DescendingLetter'  key='2' >Product (Z-A)</option>
+            <option value='NewestOnTop'  key='3'  >Date (Newest On Top)</option>
+            <option value='OldestOnTop'  key='4'  >Date (Oldest On Top)</option>
+          </select>
+        
+      </div>
+      <table>
+          <thead>
+          <tr>
+              <th>Product</th>
+              <th>Qty</th>
+              <th>Price</th>
+              <th>Disc</th>
+              <th>Total</th>
+              <th>Date</th>
+              <th>Delete</th>
+          </tr>
+      </thead>
+          <tbody style = {{backgroundColor: 'white'}}>
+              {currentItems.map((sale)=>(
+                  <tr key={sale._id}>
+                      <td>{sale.ProductName}</td>
+                      <td>{sale.NumberOfItem}</td>
+                      <td>{sale.PricePerItem}</td>
+                      <td>{sale.discount}</td>
+                      <td>{sale.TotalPrice}</td>
+                      <td>{sale.Timestamp}</td>
+                      <td onClick={() => handleDelete(sale._id)} className='icon-btn delete-btn'><AiFillDelete/></td>
+                  </tr>
+               ))}
+          </tbody>  
+            <tfoot >
+            <tr style = {{backgroundColor: 'grey'}}>
+              <td>Total</td>
+              <td>{totalQuantity}</td>
+              <td></td>
+              <td>{totalDoscount}</td>
+              <td>{totalSale}</td>
+              <td></td>
+              <td></td>
             </tr>
-        </thead>
-            <tbody style = {{backgroundColor: 'white'}}>
-                {currentItems.map((sale)=>(
-                    <tr key={sale._id}>
-                        <td>{sale.ProductName}</td>
-                        <td>{sale.NumberOfItem}</td>
-                        <td>{sale.PricePerItem}</td>
-                        <td>{sale.discount}</td>
-                        <td>{sale.TotalPrice}</td>
-                        <td>{sale.Timestamp}</td>
-                        <td onClick={() => handleDelete(sale._id)} className='icon-btn delete-btn'><AiFillDelete/></td>
-                    </tr>
-                 ))}
-            </tbody>  
-              <tfoot >
-              <tr style = {{backgroundColor: 'grey'}}>
-                <td>Total</td>
-                <td>{totalQuantity}</td>
-                <td></td>
-                <td>{totalDoscount}</td>
-                <td>{totalSale}</td>
-                <td></td>
-                <td></td>
-              </tr>
-            </tfoot>
-        </table>
-        <div className="pagination">
-          <button style={{width: '30px' , boxShadow:'none' , color: 'green' , backgroundColor: 'white'}} className='icon-btn' onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}><AiFillCaretLeft/></button>
-          <span style = {{margin: 'auto 30px' , fontSize:'20px'}}>Page {currentPage}</span>
-          <button style={{width: '30px' , boxShadow:'none' , color: 'green' , backgroundColor: 'white'}} className='icon-btn' onClick={() => setCurrentPage(currentPage + 1)} disabled={indexOfLastItem >= saleDet.length}><AiFillCaretRight/></button>
-        </div>
+          </tfoot>
+      </table>
+      <div className="pagination">
+        <button style={{width: '30px' , boxShadow:'none' , color: 'green' , backgroundColor: 'white'}} className='icon-btn' onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}><AiFillCaretLeft/></button>
+        <span style = {{margin: 'auto 30px' , fontSize:'20px'}}>Page {currentPage}</span>
+        <button style={{width: '30px' , boxShadow:'none' , color: 'green' , backgroundColor: 'white'}} className='icon-btn' onClick={() => setCurrentPage(currentPage + 1)} disabled={indexOfLastItem >= saleDet.length}><AiFillCaretRight/></button>
+      </div>
     </div>
+  </div>
+    
+
+
+ 
+    
   )
 }
 

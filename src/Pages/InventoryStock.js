@@ -7,16 +7,15 @@ const InventoryStock = () => {
 
         const [productName, setProductName] = useState([]);
         const [selectedProduct, setSelectedProduct] = useState('');
-        const [numberOfItems, setNumberOfItems] = useState();
+        const [numberOfItems, setNumberOfItems] = useState('');
         const [saleDet, setSaleDet] = useState([]);
         const [productSale, setProductSale] = useState({});
 
         useEffect(()=>{
             fetchProduct();
             fetchSaleData();
-            productSaleData();
 
-    }, [selectedProduct]);
+        }, []);
 
         console.log("productSale are:" , productSale)
         const token = localStorage.getItem('token'); 
@@ -38,10 +37,21 @@ const InventoryStock = () => {
                       headers : headers
                     });
                     console.log('sales are', response.data.sales);
-                    const result = response.data.sales;
-                    const SalesData = result.map((product) => product);
+                    const result = await response.data.sales;
+                    const SalesData = await result.map((product) => product);
                     setSaleDet(SalesData)
-                    
+                    const totals = {};
+                    const EachProductSale = await saleDet.forEach((sale) => {
+                    if (totals[sale.ProductName]) {
+                        totals[sale.ProductName] += sale.NumberOfItem;
+                    }
+                    else {
+                        totals[sale.ProductName] = sale.NumberOfItem;
+                    }
+                    setProductSale(totals);
+                    });
+                    console.log(EachProductSale);
+ 
                   } catch (error) {
                     console.error('Error fetching data:', error);
                   }
@@ -59,20 +69,31 @@ const InventoryStock = () => {
                 catch(error) {
                     console.error("Could not fetch products", error);
                 }        
-            }
+            };
 
-        const productSaleData = async () => {
-            const totals = {};
-            const res = await saleDet.forEach((sale) => {
-            if (totals[sale.ProductName]) {
-                totals[sale.ProductName] += sale.NumberOfItem;
+        const addtoStockHandler = async() => {
+  
+            const token = localStorage.getItem('token'); 
+            const userId = localStorage.getItem('userId');
+            const headers = {
+              Authorization: token,
+              'user-id': userId,
+            };
+
+            try {
+                    const response = await api.post('/api/auth/inventory' , {
+                    params : {selectedProduct , numberOfItems},
+                    headers : headers
+                });
+                const resutl = response.data;
+                console.log('inventory is add to db', resutl)
+
+            } catch (error) {
+                console.log('error adding inventory', error)
             }
-            else {
-                totals[sale.ProductName] = sale.NumberOfItem;
-            }
-        });
-        setProductSale(totals); 
         }
+
+
 
 
 
@@ -90,7 +111,7 @@ const InventoryStock = () => {
                     </select>   
                     <input style={{width: '100px'}} className='SRinput' type='number' min={0} placeholder='Quantity' name='NumberOfItem' value = {numberOfItems} onChange={(e)=>{setNumberOfItems(e.target.value)}} ></input>
                 </div>
-                <button  style = {{textAlign: 'center' , width: '120px'}} >Add to Stock</button> 
+                <button onClick={addtoStockHandler}  style = {{textAlign: 'center' , width: '120px'}} >Add to Stock</button> 
                 <Link to='/InventoryRecord'><button style={{width: '120px'}}>Stock Record</button></Link>
             </div>
         </div>

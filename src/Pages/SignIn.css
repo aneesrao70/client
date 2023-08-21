@@ -13,6 +13,7 @@ body {
 
 
 .container1 {
+    position: relative;
     width: 290px;
     background-image:linear-gradient(to left,#d2ffff , #0694c6) ;
     margin: 50px auto auto auto;
@@ -101,3 +102,28 @@ button:active {
     margin: none;
     padding: none;
 }
+
+.loading {
+    opacity: 0.3;
+}
+
+.main-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+  }
+  
+  .loader-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .loader {
+    z-index: 1000;
+  }
