@@ -43,7 +43,7 @@ const SignIn = ({isLoggedIn , setIsLoggedIn}) => {
               notify();
               setTimeout(() => {
                 History('/'); // Replace '/' with your homepage URL
-              }, 5000); 
+              }, 1000); 
           } else {
             setLoginSuccess(!loginSuccess);
               console.log('Login failed');

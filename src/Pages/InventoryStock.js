@@ -7,6 +7,7 @@ const InventoryStock = () => {
 
 
         const [productName, setProductName] = useState([]);
+        const [inventoryData , setInventoryData] = useState([])
         const [selectedProduct, setSelectedProduct] = useState('');
         const [numberOfItems, setNumberOfItems] = useState('');
         const [saleDet, setSaleDet] = useState([]);
@@ -16,8 +17,9 @@ const InventoryStock = () => {
         useEffect(()=>{
             fetchProduct();
             fetchSaleData();
+            fetchInventoryData();
 
-        }, [isLoading]);
+        }, []);
         const currentDate = new Date();
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1; // Months are 0-indexed, so add 1
@@ -31,6 +33,27 @@ const InventoryStock = () => {
           Authorization: token,
           'user-id': userId,
         };
+        const fetchInventoryData = async() => {
+            setIsLoading(true);
+            try {
+              const response = await api.get('/api/auth/inventory' , {
+               
+                headers : headers
+              });
+              const result = await response.data;
+              const InventoryAdd = result.map((inventory) => inventory)
+        
+              setInventoryData(InventoryAdd);
+              console.log('inventory data is:' , inventoryData);
+        
+              console.log('Inventory record is: ' , result);
+              setIsLoading(false);
+        
+            } catch (err) {
+              console.log("error fetching inventory" , err);
+              setIsLoading(false);
+            }
+          }
       
             const fetchSaleData = async()=> {
                 const token = localStorage.getItem('token'); 
@@ -47,17 +70,6 @@ const InventoryStock = () => {
                     const result = await response.data.sales;
                     const SalesData = await result.map((product) => product);
                     setSaleDet(SalesData)
-                    const totals = {};
-                    const EachProductSale = await saleDet.forEach((sale) => {
-                    if (totals[sale.ProductName]) {
-                        totals[sale.ProductName] += sale.NumberOfItem;
-                    }
-                    else {
-                        totals[sale.ProductName] = sale.NumberOfItem;
-                    }
-                    setProductSale(totals);
-                    });
-                    console.log(EachProductSale);
                     setIsLoading(false);
  
                   } catch (error) {
@@ -111,6 +123,29 @@ const InventoryStock = () => {
                 setIsLoading(false);
             }
         }
+    
+    
+
+    // Calculate the total sold items for each product
+const productSales = saleDet.reduce((acc, sale) => {
+    const { ProductName, NumberOfItem } = sale;
+    acc[ProductName] = (acc[ProductName] || 0) + NumberOfItem;
+    return acc;
+  }, {});
+  
+  // Calculate the total items added to inventory for each product
+  const productInventory = inventoryData.reduce((acc, inventory) => {
+    const { ProductName, NumberOfItem } = inventory;
+    acc[ProductName] = (acc[ProductName] || 0) + NumberOfItem;
+    return acc;
+  }, {});
+  
+  // Calculate the remaining items for each product
+  const productRemaining = {};
+  for (const product in productInventory) {
+    productRemaining[product] = productInventory[product] - (productSales[product] || 0);
+  }
+  
 
 
 
@@ -154,16 +189,20 @@ const InventoryStock = () => {
                 <thead>
                     <tr>
                         <th>Product</th>
-                        <th>Qty</th>
+                        <th>Qty Sold</th>
+                        <th>Qty Added</th>
+                        <th>Remaining</th>
                     </tr>
                 </thead>
                 <tbody style = {{backgroundColor: 'white'}}>
-                        {Object.keys(productSale).map((componentName) => (
-                            <tr key={componentName}>
-                            <td>{componentName}</td>
-                            <td>{productSale[componentName]}</td>
-                            </tr>
-                        ))}
+                {Object.keys(productSales).map((product) => (
+                    <tr key={product}>
+                      <td>{product}</td>
+                      <td>{productSales[product]}</td>
+                      <td>{productInventory[product] || 0}</td>
+                      <td>{productRemaining[product] || 0}</td>
+                    </tr>
+                  ))}
                 </tbody>  
             </table>       
         </div>  
