@@ -19,6 +19,8 @@ import {useState , useEffect} from 'react';
 function App() {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+
   useEffect(() => {
     // Check if the user is logged in
     const token = localStorage.getItem('token');
@@ -28,6 +30,16 @@ function App() {
     } else {
       setIsLoggedIn(false);
     }
+    const clearLocalStorageOnExit = () => {
+      localStorage.removeItem('token');
+      // You can remove other items as needed
+    };
+
+    window.addEventListener('beforeunload', clearLocalStorageOnExit);
+
+    return () => {
+      window.removeEventListener('beforeunload', clearLocalStorageOnExit);
+    };
   }, []);
 
  

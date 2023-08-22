@@ -6,6 +6,7 @@
     align-items: center;
     margin: 20px 50px 0 50px;
     height: 50px;
+    z-index: 1000;
 }
 
 .nav-btn {
@@ -21,6 +22,7 @@
 }
 
 
+
 li {
     background-image: linear-gradient(to left,#d2ffff , #0694c6);
     width: 120px;
@@ -33,6 +35,10 @@ li {
 li:hover {
     background-color: green;
     color: red;
+}
+.logOut {
+  background-image: none;
+  background-color: white;
 }
 a {
     text-decoration: none !important;
@@ -49,6 +55,7 @@ a {
         align-items: center;
         justify-content: space-around;
         margin: 30px 10px 0 10px;
+        z-index: 1000;
     }
     .nav-btn {
       display: block; /* Show the button for smaller screens */

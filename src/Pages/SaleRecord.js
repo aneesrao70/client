@@ -88,8 +88,8 @@ const SaleRecord = () => {
         });
         console.log('sales are', response.data.sales);
         const result = response.data.sales;
-        const SalesData = result.map((product) => product);
-        setSaleDet(SalesData)
+        console.log('result is' , result)
+        setSaleDet(result)
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -133,7 +133,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
 const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 // Get the current items to be displayed
 const currentItems = saleDet.slice(indexOfFirstItem, indexOfLastItem);
-console.log(currentItems)
+console.log('current items aare: ' , currentItems)
 
   return (
     <div>

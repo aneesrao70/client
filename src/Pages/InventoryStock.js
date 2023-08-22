@@ -1,6 +1,7 @@
 import React , {useState , useEffect} from 'react'
 import { Link } from 'react-router-dom';
 import api from '../api';
+import { Bars } from  'react-loader-spinner'
 
 const InventoryStock = () => {
 
@@ -10,12 +11,18 @@ const InventoryStock = () => {
         const [numberOfItems, setNumberOfItems] = useState('');
         const [saleDet, setSaleDet] = useState([]);
         const [productSale, setProductSale] = useState({});
+        const [isLoading , setIsLoading] = useState(true);
 
         useEffect(()=>{
             fetchProduct();
             fetchSaleData();
 
-        }, []);
+        }, [isLoading]);
+        const currentDate = new Date();
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth() + 1; // Months are 0-indexed, so add 1
+  const day = currentDate.getDate();
+  const localDateString = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
 
         console.log("productSale are:" , productSale)
         const token = localStorage.getItem('token'); 
@@ -51,9 +58,11 @@ const InventoryStock = () => {
                     setProductSale(totals);
                     });
                     console.log(EachProductSale);
+                    setIsLoading(false);
  
                   } catch (error) {
                     console.error('Error fetching data:', error);
+                    setIsLoading(false);
                   }
                 }
 
@@ -70,26 +79,36 @@ const InventoryStock = () => {
                     console.error("Could not fetch products", error);
                 }        
             };
+            const reqData = {
+                ProductName : selectedProduct,
+                NumberOfItem : numberOfItems,
+                Timestamp : localDateString
+            }
 
         const addtoStockHandler = async() => {
+            setIsLoading(true);
   
             const token = localStorage.getItem('token'); 
             const userId = localStorage.getItem('userId');
+
             const headers = {
               Authorization: token,
               'user-id': userId,
             };
 
             try {
-                    const response = await api.post('/api/auth/inventory' , {
-                    params : {selectedProduct , numberOfItems},
-                    headers : headers
-                });
-                const resutl = response.data;
-                console.log('inventory is add to db', resutl)
+                const response = await api.post('/api/auth/inventory', reqData, {
+                    headers: headers,
+                  });
+                const result = response.data;
+                console.log('inventory is add to db', result)
+                setSelectedProduct('');
+                setNumberOfItems('');
+                setIsLoading(false);
 
             } catch (error) {
                 console.log('error adding inventory', error)
+                setIsLoading(false);
             }
         }
 
@@ -98,7 +117,21 @@ const InventoryStock = () => {
 
 
   return (
-    <div className='container-1'>
+    <div>
+    { isLoading && (<div className = 'loader-overlay'>
+    <div className='loader'>
+      <Bars
+        height="60"
+        width="60"
+        color="blue"
+        ariaLabel="bars-loading"
+        wrapperStyle={{}}
+        wrapperClass=""
+        visible={true}
+      />
+      </div>
+    </div>)}
+    <div className={`container-1  ${isLoading ? 'loading' : ''}`}>
         <div className='container2'>
             <div className='container4'>
             <h1>Enter Inventory</h1>
@@ -134,6 +167,7 @@ const InventoryStock = () => {
                 </tbody>  
             </table>       
         </div>  
+    </div>
     </div>
   )
 }

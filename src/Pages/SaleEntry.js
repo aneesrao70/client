@@ -21,10 +21,10 @@ const SaleEntry = () => {
   const [isLoading , setIsLoading] = useState(true)
   
   const token = localStorage.getItem('token'); 
-  const userId = localStorage.getItem('userId');
+
   const headers = {
     Authorization: token,
-    'user-id': userId,
+
   };
       const handleSaleChange = (e) => {
         const {name,value}=e.target;
@@ -51,6 +51,7 @@ const SaleEntry = () => {
             const response = await api.post('/api/auth/Sale', reqSaleData , {headers} );
             console.log("data posted to DB", response);
             setSaleDatail(initialSaleDetail);
+            setSelectedProduct('');
             console.log(saleDetail);
             setIsLoading(false);
         }   catch(error) {
@@ -80,6 +81,7 @@ const SaleEntry = () => {
       }
       catch(error) {
           console.error("Could not fetch products", error);
+          setIsLoading(false)
       }
 
   }
@@ -107,13 +109,13 @@ const SaleEntry = () => {
   const handleDelete = async() => {
     setIsLoading(true);
     const token = localStorage.getItem('token'); 
-    const userId = localStorage.getItem('userId');
+    
     const headers = {
       Authorization: token,
-      'user-id': userId,
+      
     };
       try {
-        console.log(headers.Authorization);
+
           const response = await api.delete('/api/auth/product', {data:{ProductName: selectedProduct} , headers: headers});
           console.log("Product deleted", response);
           setProductName(productName.filter((product) => product !== selectedProduct));

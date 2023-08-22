@@ -31,7 +31,7 @@ const Navbar = ({isLoggedIn,setIsLoggedIn}) => {
                 <li><Link to="/SaleRecord">Sales Record</Link></li>
                 <li><Link to="/InventoryStock">Stock</Link></li>
                 <li><Link to="/InventoryRecord">Stock Record</Link></li>
-                <li><Link onClick={lgot}  to="/">Log Out</Link></li>
+                <li className='logOut' ><Link onClick={lgot}  to="/">Log Out</Link></li>
               </>
               ) : (
                 <>           

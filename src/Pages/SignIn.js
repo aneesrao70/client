@@ -1,8 +1,12 @@
 import React, {useState} from 'react'
 import './SignIn.css';
-import {Link , Navigate } from 'react-router-dom';
+import {Link , Navigate , useNavigate } from 'react-router-dom';
 import api from '../api';
 import { Bars } from  'react-loader-spinner'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
 
 const SignIn = ({isLoggedIn , setIsLoggedIn}) => {
     const [sData,setSData] = useState({email: '', password: ''});
@@ -11,9 +15,11 @@ const SignIn = ({isLoggedIn , setIsLoggedIn}) => {
     const [errorMsgEmail , setErrorMsgEmail] = useState('');
     const [errorMsgPassword, setErrorMsgPassword] = useState('');
     const [isLoading , setIsLoading] = useState(false);
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
 
-
+    const notify = () => toast("Success, Your are logged in.");
+    const History = useNavigate();
     function handleChange(e) {
       setErrorMsgEmail('');
       setErrorMsgPassword('');
@@ -34,6 +40,10 @@ const SignIn = ({isLoggedIn , setIsLoggedIn}) => {
               console.log('Login successful');
               setIsLoggedIn(true); 
               setIsLoading(false);
+              notify();
+              setTimeout(() => {
+                History('/'); // Replace '/' with your homepage URL
+              }, 5000); 
           } else {
             setLoginSuccess(!loginSuccess);
               console.log('Login failed');
@@ -68,8 +78,9 @@ const SignIn = ({isLoggedIn , setIsLoggedIn}) => {
           />
           </div>
         </div>)}
+        
       <div className = {`container1  ${isLoading ? 'loading' : ''}`}>
-      {isLoggedIn && <Navigate to="/" />}
+
           <h1>Sign In</h1>
           <input className='SRinput' value={sData.email} onChange={handleChange} name="email" type='email' placeholder='Email'></input>
           {errorMsgEmail && <span className='error'>{errorMsgEmail}</span>}
@@ -78,6 +89,18 @@ const SignIn = ({isLoggedIn , setIsLoggedIn}) => {
           {loginFailure !== '' && <span className='error'>{loginFailure}</span>}
           <button onClick={handleLogin} >Sign In</button>
           <h4 className = 'footing'>Already have an account? <Link to = "/Register"> Register</Link></h4>
+          <ToastContainer
+          position="top-center"
+          autoClose={2000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick={false}
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+              />
           
       </div>
       
