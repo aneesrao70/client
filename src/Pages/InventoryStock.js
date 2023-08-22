@@ -142,6 +142,8 @@ const productSales = saleDet.reduce((acc, sale) => {
   
   // Calculate the remaining items for each product
   const productRemaining = {};
+  console.log(productSales);
+  console.log(productInventory);
   for (const product in productInventory) {
     productRemaining[product] = productInventory[product] - (productSales[product] || 0);
   }
@@ -195,7 +197,7 @@ const productSales = saleDet.reduce((acc, sale) => {
                     </tr>
                 </thead>
                 <tbody style = {{backgroundColor: 'white'}}>
-                {Object.keys(productSales).map((product) => (
+                {Object.keys(productInventory).map((product) => (
                     <tr key={product}>
                       <td>{product}</td>
                       <td>{productSales[product]}</td>
