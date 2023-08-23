@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import './Register.css';
 import { Link } from 'react-router-dom';
-import { Navigate } from 'react-router-dom';
+import { Navigate , useNavigate } from 'react-router-dom';
 import api from '../api'
 import { Bars } from  'react-loader-spinner'
 import { ToastContainer, toast } from 'react-toastify';
@@ -16,6 +16,8 @@ const Register = () => {
     const [errorMessages,setErrorMessages] = useState('');
     const [isLoading , setIsLoading] = useState(false);
     const [registerationSuccess,setRegisterationSuccess]=useState(false);
+
+    const Navigate = useNavigate();
 
     const notifyRegistration = () => toast.success("Registration Successfull");
   
@@ -81,6 +83,9 @@ const Register = () => {
           setIsLoading(false)
           
           setData({uname:'',email:'',password:'',confirmpassword:''});
+          setTimeout(() => {
+            Navigate("/login");
+          }, 1000);
         } catch (error){
           console.error('Error posting data:', error.response);
           if (error.response.status) {
@@ -111,7 +116,6 @@ const Register = () => {
       </div>
     </div>)}
     <div className = {`container1  ${isLoading ? 'loading' : ''}`}>
-    {registerationSuccess && <Navigate to="/SignIn" />}
             <h1 style = {{display:'flex', justifyContent:'center', alignItems:'center'}}>Register</h1>
             <input className='SRinput' onChange={handleChange} value={data.uname} name="uname" type="text" placeholder='First Name'></input>
             {errors.na&& <span className='error'>{errors.na}</span>}

@@ -20,7 +20,7 @@ const SaleRecord = () => {
   const [itemsPerPage] = useState(10);
   const [isLoading , setIsLoading] = useState(true);
 
-  const notifyDeleteSale = () => toast.success("Success, Your are logged in.");
+  const notifyDeleteSale = () => toast.success("Success, Sale is deleted.");
 
 
   const removeFilters = () => {
