@@ -2,6 +2,8 @@ import React , {useState , useEffect , useRef} from 'react'
 import { Link } from 'react-router-dom';
 import api from '../api';
 import { Bars } from  'react-loader-spinner'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 
@@ -20,6 +22,10 @@ const SaleEntry = () => {
   const [saleDetail,setSaleDatail] = useState(initialSaleDetail);
   const [isLoading , setIsLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState({});
+
+  const notifyAddProduct = () => toast.success("Success, Product is added.");
+  const notifyDeleteProduct = () => toast.success("Success, Product is deleted.");
+  const notifyAddSale = () => toast.success("Success, Sale is added.");
   
   const token = localStorage.getItem('token'); 
 
@@ -69,6 +75,7 @@ const SaleEntry = () => {
         try {
             const response = await api.post('/api/auth/Sale', reqSaleData , {headers} );
             console.log("data posted to DB", response);
+            notifyAddSale();
             setSaleDatail(initialSaleDetail);
             setSelectedProduct('');
             console.log(saleDetail);
@@ -124,6 +131,7 @@ const SaleEntry = () => {
           const response = await api.post('/api/auth/product', reqData , {headers});
           console.log("data posted to DB", response);
           setProductName([...productName, addProduct]);
+          notifyAddProduct();
           setAddProduct('');
           setIsLoading(false);
       }
@@ -139,6 +147,7 @@ const SaleEntry = () => {
     const valid = {};
     if (selectedProduct === '') {
       valid.selectedProduct = "Please select a product";
+      setIsLoading(false);
     }
     setErrorMsg(valid);
     const token = localStorage.getItem('token'); 
@@ -147,18 +156,24 @@ const SaleEntry = () => {
       Authorization: token,
       
     };
-      try {
-
-          const response = await api.delete('/api/auth/product', {data:{ProductName: selectedProduct} , headers: headers});
-          console.log("Product deleted", response);
-          setProductName(productName.filter((product) => product !== selectedProduct));
-          setSelectedProduct('');
-          setIsLoading(false);
-      }
-      catch(error) {
-          console.error("error deleting the product", error);
-          setIsLoading(false);
-      }       
+    if (selectedProduct !== '') {
+          try {
+            const response = await api.delete('/api/auth/product', {data:{ProductName: selectedProduct} , headers: headers});
+            console.log("Product deleted", response);
+            notifyDeleteProduct();
+            setProductName(productName.filter((product) => product !== selectedProduct));
+            setSelectedProduct('');
+            setIsLoading(false);
+        }
+        catch(error) {
+            console.error("error deleting the product", error);
+            setIsLoading(false);
+        }  
+    }
+    else {
+      console.log("product is not selected for deletion"); 
+      setIsLoading(false);    
+    }    
   }
 
 
@@ -183,7 +198,7 @@ const SaleEntry = () => {
           <div className='container2'>
             <div className='container3'> 
               <input style = {{width: '170px', marginRight:'5px'}}  className='SRinput' type='text' value={addProduct} onChange={(e)=>(setAddProduct(e.target.value))}></input>
-              <button onClick={handleAddProduct} style = {{width: '120px'}} >Add Product</button>
+              <button className='button' onClick={handleAddProduct} style = {{width: '120px'}} >Add Product</button>
             </div>
             {errorMsg.addProduct && <span className='error'>{errorMsg.addProduct}</span>}
             <div className='container3'>
@@ -193,7 +208,7 @@ const SaleEntry = () => {
                   <option value={prod} key={index}>{prod}</option>
               ))}       
               </select>   
-              <button onClick={handleDelete}  style = {{width: '120px'}} >delete</button> 
+              <button className='button' onClick={handleDelete}  style = {{width: '120px'}} >delete</button> 
             </div>
             {errorMsg.selectedProduct&& <span className='error'>{errorMsg.selectedProduct}</span>}
           </div>
@@ -204,10 +219,22 @@ const SaleEntry = () => {
                 {errorMsg.PricePerItem && <span className='error'>{errorMsg.PricePerItem}</span>}
                 <input className='SRinput' type='number' min={0} placeholder='Discount' name='discount' value = {saleDetail.discount} onChange={handleSaleChange} ></input>
                 {errorMsg.discount && <span className='error'>{errorMsg.discount}</span>}
-                <button onClick={handleSale}>Add Sale</button> 
-                <Link to='/SaleRecord'><button>Record</button></Link>
+                <button className='button' onClick={handleSale}>Add Sale</button> 
+                <Link to='/SaleRecord'><button className='button'>Record</button></Link>
           </div>  
         </div> 
+        <ToastContainer
+        position="top-center"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+            />
     </div>
   )
 }

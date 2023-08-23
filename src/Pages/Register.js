@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { Navigate } from 'react-router-dom';
 import api from '../api'
 import { Bars } from  'react-loader-spinner'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 
@@ -14,6 +16,8 @@ const Register = () => {
     const [errorMessages,setErrorMessages] = useState('');
     const [isLoading , setIsLoading] = useState(false);
     const [registerationSuccess,setRegisterationSuccess]=useState(false);
+
+    const notifyRegistration = () => toast.success("Registration Successfull");
   
     const handleCheck = (e)=> {
       setIsChecked(e.target.checked);
@@ -71,16 +75,21 @@ const Register = () => {
         try {
           const response =await api.post('/api/auth/register', reqData);
           console.log('Data posted successfully:', response);
+          notifyRegistration();
           setData(setRegisterationSuccess(true))
           setErrorMessages('');
           setIsLoading(false)
           
           setData({uname:'',email:'',password:'',confirmpassword:''});
         } catch (error){
-          console.error('Error posting data:', error.response.status);
-          if (error.response.status === 409) {
-            setErrorMessages("Email already exists, please sign in.")
+          console.error('Error posting data:', error.response);
+          if (error.response.status) {
+            if (error.response.status === 409) {
+              setErrorMessages("Email already exists, please sign in.")
+            }
+            setIsLoading(false);
           }
+
           setIsLoading(false);
         }       
     };
@@ -122,9 +131,21 @@ const Register = () => {
                 <label className='inline-div' id='check' htmlFor='flexCheck'>I agree with all terms and conditions.</label><br />
             </div>
             {errors.che&& <p className='error'>{errors.che}</p>}
-            <div style = {{display:'flex', justifyContent:'center', alignItems:'center' }}><button onClick={handleSubmit}>Register</button></div>
+            <div style = {{display:'flex', justifyContent:'center', alignItems:'center' }}><button className='button' onClick={handleSubmit}>Register</button></div>
             <h3 className='footing'>Already have an account? <Link to = "/SignIn"> Sign In</Link></h3>
      </div>
+     <ToastContainer
+     position="top-center"
+     autoClose={2000}
+     hideProgressBar={false}
+     newestOnTop={false}
+     closeOnClick={false}
+     rtl={false}
+     pauseOnFocusLoss
+     draggable
+     pauseOnHover
+     theme="colored"
+         />
     </div>
   );
 }

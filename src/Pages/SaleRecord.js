@@ -1,6 +1,8 @@
 import React  , {useState , useEffect} from 'react';
 import api from '../api';
 import './SaleRecord.css';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { Bars } from  'react-loader-spinner'
 import { AiFillCaretLeft , AiFillCaretRight , AiFillDelete } from 'react-icons/ai';
 
@@ -17,6 +19,8 @@ const SaleRecord = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [isLoading , setIsLoading] = useState(true);
+
+  const notifyDeleteSale = () => toast.success("Success, Your are logged in.");
 
 
   const removeFilters = () => {
@@ -111,6 +115,7 @@ const SaleRecord = () => {
             headers : headers
           });
           console.log('Sale Deleted:', response)
+          notifyDeleteSale();
           const updatedItems = saleDet.filter((sale) => sale._id !== saleId);
           setSaleDet(updatedItems); 
           setIsLoading(false);
@@ -155,20 +160,20 @@ console.log('current items aare: ' , currentItems)
       <div className='Table-input-container'>
         <div className='input-btn'>
           <input style={{paddingLeft:'0' , textAlign:'center' , fontSize: '15px' , width: '180px'}} className='SRinput' type="text" name = 'prodName' value = {prodName} placeholder = 'Search by Product' onChange={(e)=>setProdName(e.target.value)}></input>
-          <button style ={{width: '120px'}} onClick = {lastSevenDaysHandler}>Last 7 Days</button>
+          <button className='button' style ={{width: '120px'}} onClick = {lastSevenDaysHandler}>Last 7 Days</button>
         </div>
         <div className='input-btn'>
           <input style={{paddingLeft:'0' , textAlign:'center' , fontSize: '15px' , width: '180px'}} className='SRinput' type="text" name = 'startDate' value = {startDate} placeholder ='Starting date (yyyy-mm-dd)' onChange={(e)=>setStartDate(e.target.value)}></input>
-          <button style ={{width: '120px'}} onClick = {lastFifteenDaysHandler}>Last 15 Days</button>
+          <button className='button' style ={{width: '120px'}} onClick = {lastFifteenDaysHandler}>Last 15 Days</button>
         </div>
         <div className='input-btn'>
           <input style={{paddingLeft:'0' , textAlign:'center' , fontSize: '15px' , width: '180px'}} className='SRinput' type="text" name = 'endDate' value = {endDate} placeholder ='Ending date (yyyy-mm-dd)' onChange={(e)=>setEndDate(e.target.value)}></input>
-          <button style ={{width: '120px'}} onClick = {lastMonthHandler}>Last 30 Days</button>
+          <button className='button' style ={{width: '120px'}} onClick = {lastMonthHandler}>Last 30 Days</button>
         </div>
 
       </div>
       <div className='Table-btn-container'>  
-        <button style ={{width: '140px'}} onClick={removeFilters}>Remove Filters</button>  
+        <button className='button' style ={{width: '140px'}} onClick={removeFilters}>Remove Filters</button>  
         
           <select value={filterParam}  onChange={(e)=>setFilterParam(e.target.value)} className='sort-select'>
             <option value=''  key=''>Sort By</option>
@@ -217,11 +222,23 @@ console.log('current items aare: ' , currentItems)
           </tfoot>
       </table>
       <div className="pagination">
-        <button style={{width: '30px' , boxShadow:'none' , color: 'green' , backgroundColor: 'white'}} className='icon-btn' onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}><AiFillCaretLeft/></button>
+        <button style={{width: '30px' , boxShadow:'none' , color: 'green' , backgroundColor: 'white'}} className='button icon-btn' onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}><AiFillCaretLeft/></button>
         <span style = {{margin: 'auto 30px' , fontSize:'20px'}}>Page {currentPage}</span>
-        <button style={{width: '30px' , boxShadow:'none' , color: 'green' , backgroundColor: 'white'}} className='icon-btn' onClick={() => setCurrentPage(currentPage + 1)} disabled={indexOfLastItem >= saleDet.length}><AiFillCaretRight/></button>
+        <button style={{width: '30px' , boxShadow:'none' , color: 'green' , backgroundColor: 'white'}} className='button icon-btn' onClick={() => setCurrentPage(currentPage + 1)} disabled={indexOfLastItem >= saleDet.length}><AiFillCaretRight/></button>
       </div>
     </div>
+    <ToastContainer
+    position="top-center"
+    autoClose={2000}
+    hideProgressBar={false}
+    newestOnTop={false}
+    closeOnClick={false}
+    rtl={false}
+    pauseOnFocusLoss
+    draggable
+    pauseOnHover
+    theme="colored"
+        />
   </div>
     
 

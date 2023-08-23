@@ -40,7 +40,7 @@ const Navbar = ({isLoggedIn,setIsLoggedIn}) => {
                 </>
             )}
         </ul>
-        <button style = {{margin:'0'}} className='nav-btn' onClick={showNavbar}><FaBars/></button>
+        <button style = {{margin:'0'}} className='button nav-btn' onClick={showNavbar}><FaBars/></button>
     </div>
   )
 }

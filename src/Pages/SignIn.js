@@ -18,7 +18,7 @@ const SignIn = ({isLoggedIn , setIsLoggedIn}) => {
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
 
-    const notify = () => toast("Success, Your are logged in.");
+    const notify = () => toast.success("Success, Your are logged in.");
     const History = useNavigate();
     function handleChange(e) {
       setErrorMsgEmail('');
@@ -87,7 +87,7 @@ const SignIn = ({isLoggedIn , setIsLoggedIn}) => {
           <input className='SRinput' value={sData.password} onChange={handleChange} name="password" type='password' placeholder='Password'></input>
           {errorMsgPassword && <span className='error'>{errorMsgPassword}</span>}
           {loginFailure !== '' && <span className='error'>{loginFailure}</span>}
-          <button onClick={handleLogin} >Sign In</button>
+          <button className='button' onClick={handleLogin} >Sign In</button>
           <h4 className = 'footing'>Already have an account? <Link to = "/Register"> Register</Link></h4>
           <ToastContainer
           position="top-center"

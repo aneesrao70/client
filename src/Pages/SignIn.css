@@ -71,7 +71,7 @@ body {
     
 }
 
-button {
+.button {
     width: 100px;
     margin: auto;
     height: 30px;
@@ -83,14 +83,14 @@ button {
     background-color: #50bce0;
 }
 
-button:hover {
+.button:hover {
     transform: scale(1.1);
     background-color: #000000;
     color: white;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-button:active {
+.button:active {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transform: translateY(2px);
     background-color: #50bce0;

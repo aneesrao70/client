@@ -2,6 +2,8 @@ import React , {useState , useEffect} from 'react'
 import { Link } from 'react-router-dom';
 import api from '../api';
 import { Bars } from  'react-loader-spinner'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const InventoryStock = () => {
 
@@ -14,6 +16,8 @@ const InventoryStock = () => {
         const [productSale, setProductSale] = useState({});
         const [isLoading , setIsLoading] = useState(true);
         const [errorMsg, setErrorMsg] = useState({});
+
+        const notifyAddInventory = () => toast.success("Success, Inventory is added.");
 
         useEffect(()=>{
             fetchProduct();
@@ -119,6 +123,7 @@ const InventoryStock = () => {
                   });
                 const result = response.data;
                 console.log('inventory is add to db', result)
+                notifyAddInventory();
                 setSelectedProduct('');
                 setNumberOfItems('');
                 setIsLoading(false);
@@ -173,8 +178,8 @@ const productSales = saleDet.reduce((acc, sale) => {
       />
       </div>
     </div>)}
-    <div className={`container-1  ${isLoading ? 'loading' : ''}`}>
-        <div className='container2'>
+    <div  className={`container-1  ${isLoading ? 'loading' : ''}`}>
+        <div style={{marginBottom : '0'}} className='container2'>
             <div className='container4'>
             <h1>Enter Inventory</h1>
                 <div className='container5'>
@@ -188,12 +193,12 @@ const productSales = saleDet.reduce((acc, sale) => {
                 </div>
                 <div>{errorMsg.selectedProduct && <span className='error'>{errorMsg.selectedProduct}</span>}</div>
                 <div>{errorMsg.numberOfItems && <span className='error'>{errorMsg.numberOfItems}</span>}</div>
-                <button onClick={addtoStockHandler}  style = {{textAlign: 'center' , width: '120px'}} >Add to Stock</button> 
-                <Link to='/InventoryRecord'><button style={{width: '120px'}}>Stock Record</button></Link>
+                <button className='button' onClick={addtoStockHandler}  style = {{textAlign: 'center' , width: '120px'}} >Add to Stock</button> 
+                <Link to='/InventoryRecord'><button className='button' style={{width: '120px'}}>Stock Record</button></Link>
             </div>
         </div>
-        <div className='container2'>
-            <h1>Your Stock</h1>
+        <div style = {{marginTop : '0'}} className='container2'>
+            <h1 style = {{marginTop : '0'}}>Your Stock</h1>
             <table>
                 <thead>
                     <tr>
@@ -216,6 +221,18 @@ const productSales = saleDet.reduce((acc, sale) => {
             </table>       
         </div>  
     </div>
+    <ToastContainer
+    position="top-center"
+    autoClose={2000}
+    hideProgressBar={false}
+    newestOnTop={false}
+    closeOnClick={false}
+    rtl={false}
+    pauseOnFocusLoss
+    draggable
+    pauseOnHover
+    theme="colored"
+        />
     </div>
   )
 }
