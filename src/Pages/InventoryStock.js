@@ -13,6 +13,7 @@ const InventoryStock = () => {
         const [saleDet, setSaleDet] = useState([]);
         const [productSale, setProductSale] = useState({});
         const [isLoading , setIsLoading] = useState(true);
+        const [errorMsg, setErrorMsg] = useState({});
 
         useEffect(()=>{
             fetchProduct();
@@ -41,12 +42,8 @@ const InventoryStock = () => {
                 headers : headers
               });
               const result = await response.data;
-              const InventoryAdd = result.map((inventory) => inventory)
-        
+              const InventoryAdd = result.map((inventory) => inventory)        
               setInventoryData(InventoryAdd);
-              console.log('inventory data is:' , inventoryData);
-        
-              console.log('Inventory record is: ' , result);
               setIsLoading(false);
         
             } catch (err) {
@@ -99,6 +96,14 @@ const InventoryStock = () => {
 
         const addtoStockHandler = async() => {
             setIsLoading(true);
+            const valid = {};
+            if(selectedProduct === '') {
+              valid.selectedProduct = "Please select a product";
+            }
+            if (numberOfItems === '') {
+              valid.numberOfItems = "Enter Quantity please ";
+            }
+            setErrorMsg(valid);
   
             const token = localStorage.getItem('token'); 
             const userId = localStorage.getItem('userId');
@@ -173,14 +178,16 @@ const productSales = saleDet.reduce((acc, sale) => {
             <div className='container4'>
             <h1>Enter Inventory</h1>
                 <div className='container5'>
-                    <select style = {{textAlign: 'center' , width: '200px' , marginRight:'5px'}} className='SRinput' onChange={(e)=>setSelectedProduct(e.target.value)} value={selectedProduct} name="productName" id="productName">
+                    <select style = {{textAlign: 'center' , width: '200px' , marginRight:'5px'}} className='SRinput' onChange={(e)=>{setSelectedProduct(e.target.value); setErrorMsg({});}} value={selectedProduct} name="productName" id="productName">
                     <option value=''>Select Product</option>
                         {productName.map((prod,index) => (
                         <option value={prod} key={index}>{prod}</option>
                     ))}       
                     </select>   
-                    <input style={{width: '100px'}} className='SRinput' type='number' min={0} placeholder='Quantity' name='NumberOfItem' value = {numberOfItems} onChange={(e)=>{setNumberOfItems(e.target.value)}} ></input>
+                    <input style={{width: '100px'}} className='SRinput' type='number' min={0} placeholder='Quantity' name='NumberOfItem' value = {numberOfItems} onChange={(e)=>{setNumberOfItems(e.target.value); setErrorMsg({});}} ></input>
                 </div>
+                <div>{errorMsg.selectedProduct && <span className='error'>{errorMsg.selectedProduct}</span>}</div>
+                <div>{errorMsg.numberOfItems && <span className='error'>{errorMsg.numberOfItems}</span>}</div>
                 <button onClick={addtoStockHandler}  style = {{textAlign: 'center' , width: '120px'}} >Add to Stock</button> 
                 <Link to='/InventoryRecord'><button style={{width: '120px'}}>Stock Record</button></Link>
             </div>
@@ -197,7 +204,7 @@ const productSales = saleDet.reduce((acc, sale) => {
                     </tr>
                 </thead>
                 <tbody style = {{backgroundColor: 'white'}}>
-                {Object.keys(productInventory).map((product) => (
+                {productName.map((product) => (
                     <tr key={product}>
                       <td>{product}</td>
                       <td>{productSales[product]}</td>

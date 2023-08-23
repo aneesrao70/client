@@ -3,6 +3,7 @@ import './Register.css';
 import { Link } from 'react-router-dom';
 import { Navigate } from 'react-router-dom';
 import api from '../api'
+import { Bars } from  'react-loader-spinner'
 
 
 
@@ -11,6 +12,7 @@ const Register = () => {
     const [errors,setErrors] = useState({});
     const [isChecked,setIsChecked] = useState(false);
     const [errorMessages,setErrorMessages] = useState('');
+    const [isLoading , setIsLoading] = useState(false);
     const [registerationSuccess,setRegisterationSuccess]=useState(false);
   
     const handleCheck = (e)=> {
@@ -63,6 +65,7 @@ const Register = () => {
         agree: isChecked,
     };
     const handleSubmit = async (e) => {
+      setIsLoading(true);
       e.preventDefault();  
       validation();    
         try {
@@ -70,6 +73,7 @@ const Register = () => {
           console.log('Data posted successfully:', response);
           setData(setRegisterationSuccess(true))
           setErrorMessages('');
+          setIsLoading(false)
           
           setData({uname:'',email:'',password:'',confirmpassword:''});
         } catch (error){
@@ -77,12 +81,27 @@ const Register = () => {
           if (error.response.status === 409) {
             setErrorMessages("Email already exists, please sign in.")
           }
+          setIsLoading(false);
         }       
     };
  
     
   return (
-    <div className='container1'>
+    <div>
+    { isLoading && (<div className = 'loader-overlay'>
+    <div className='loader'>
+      <Bars
+        height="60"
+        width="60"
+        color="blue"
+        ariaLabel="bars-loading"
+        wrapperStyle={{}}
+        wrapperClass=""
+        visible={true}
+      />
+      </div>
+    </div>)}
+    <div className = {`container1  ${isLoading ? 'loading' : ''}`}>
     {registerationSuccess && <Navigate to="/SignIn" />}
             <h1 style = {{display:'flex', justifyContent:'center', alignItems:'center'}}>Register</h1>
             <input className='SRinput' onChange={handleChange} value={data.uname} name="uname" type="text" placeholder='First Name'></input>
@@ -106,6 +125,7 @@ const Register = () => {
             <div style = {{display:'flex', justifyContent:'center', alignItems:'center' }}><button onClick={handleSubmit}>Register</button></div>
             <h3 className='footing'>Already have an account? <Link to = "/SignIn"> Sign In</Link></h3>
      </div>
+    </div>
   );
 }
 
