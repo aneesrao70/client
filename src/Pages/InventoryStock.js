@@ -202,9 +202,9 @@ const InventoryStock = () => {
                 {productName.map((product) => (
                     <tr key={product}>
                       <td>{product}</td>
-                      <td>{productSales[product]}</td>
+                      <td>{productSales[product] || 0}</td>
                       <td>{productInventory[product] || 0}</td>
-                      <td>{productRemaining[product] || 0}</td>
+                      <td>{productRemaining[product] < 0 ? 'Add Stock 😂' : productRemaining[product]}</td>
                     </tr>
                   ))}
                 </tbody>  

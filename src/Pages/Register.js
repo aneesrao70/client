@@ -64,16 +64,16 @@ const Register = () => {
         validationErrors.che = "Please agree with terms and conditions";
       } 
       setErrors(validationErrors);
-     return Object.keys(errors).length === 0;
     };
     const reqData = {
       ...data,
         agree: isChecked,
     };
     const handleSubmit = async (e) => {
-      setIsLoading(true);
       e.preventDefault();  
-      validation();    
+      validation();  
+      if (Object.keys(errors).length === 0) {
+        setIsLoading(true);
         try {
           const response =await api.post('/api/auth/register', reqData);
           console.log('Data posted successfully:', response);
@@ -96,7 +96,12 @@ const Register = () => {
           }
 
           setIsLoading(false);
-        }       
+        } 
+
+      } 
+      else {
+        setIsLoading(false);
+      }      
     };
  
     
