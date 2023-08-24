@@ -1,5 +1,5 @@
 import React , {useState , useEffect , useRef} from 'react'
-import { Link } from 'react-router-dom';
+import { Link, json } from 'react-router-dom';
 import api from '../api';
 import { Bars } from  'react-loader-spinner'
 import { ToastContainer, toast } from 'react-toastify';
@@ -9,17 +9,12 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const SaleEntry = () => {
 
-  const initialSaleDetail = {
-    PricePerItem: '',
-    NumberOfItem: '',
-    discount: '',
-    TotalPrice: ''
-};
-
   const [productName, setProductName] = useState([]);
   const [addProduct, setAddProduct] =useState('');
   const [selectedProduct, setSelectedProduct] = useState('');
-  const [saleDetail,setSaleDatail] = useState(initialSaleDetail);
+  const [pricePerItem , setPricePerItem] = useState(' ');
+  const [numberOfItem, setNumberOfItem] = useState('');
+  const [discount , setDiscount] = useState('');
   const [isLoading , setIsLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState({});
 
@@ -33,19 +28,16 @@ const SaleEntry = () => {
     Authorization: token,
 
   };
-      const handleSaleChange = (e) => {
-        const {name,value}=e.target;
-        setSaleDatail({...saleDetail,[name]:value});
-        setErrorMsg({});
-      }
       const currentDate = new Date();
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth() + 1; // Months are 0-indexed, so add 1
       const day = currentDate.getDate();
       const localDateString = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;  
       const reqSaleData = {
-      ...saleDetail,
-      TotalPrice : saleDetail.NumberOfItem * saleDetail.PricePerItem - saleDetail.discount,
+      NumberOfItem: numberOfItem,
+      PricePerItem: pricePerItem,
+      discount: numberOfItem * pricePerItem > discount ? discount : numberOfItem * pricePerItem,
+      TotalPrice : numberOfItem * pricePerItem - (numberOfItem * pricePerItem > discount ? discount : numberOfItem * pricePerItem),
       Timestamp : localDateString,
       ProductName : selectedProduct
   }
@@ -53,47 +45,59 @@ const SaleEntry = () => {
 
   const handleSale = async(e) => {
     setErrorMsg({});
-    setIsLoading(true);
     const valid = {};
 
     if (selectedProduct === '') {
       valid.selectedProduct = "Please select a product";
     }
-    if (saleDetail.PricePerItem === '') {
+    if (pricePerItem === undefined) {
       valid.PricePerItem = "Please add a price per item";
     }
-    if (saleDetail.NumberOfItem === '') {
+    if (pricePerItem < 1) {
+      valid.PricePerItemError = "Price per Item should be more than zero.";
+    }
+    if (numberOfItem === undefined) {
         valid.NumberOfItem = "Please add a number of items";
     }
-    if (saleDetail.discount === '') {
+    if (numberOfItem < 1) {
+      valid.NumberOfItemError = "Number of item should be more than zero";
+    }
+    if (discount === undefined) {
       valid.discount = "Please add a discount ";
+    }
+    if (discount < 0) {
+      valid.discountError1 = "discount can not be less than zero";
+    }
+    if (discount > (numberOfItem < 0 ? -numberOfItem : numberOfItem) * (pricePerItem < 0 ? -pricePerItem : pricePerItem)) {
+      valid.discountError = `Discount can not be more than ${numberOfItem * pricePerItem}`;
     }
     setErrorMsg(valid);
     e.preventDefault(); 
-    console.log(errorMsg);
-    if (selectedProduct !== "") {
-        try {
-            const response = await api.post('/api/auth/Sale', reqSaleData , {headers} );
-            console.log("data posted to DB", response);
-            notifyAddSale();
-            setSaleDatail(initialSaleDetail);
-            setSelectedProduct('');
-            console.log(saleDetail);
-            setIsLoading(false);
-        }   catch(error) {
-            console.error("error posting data to DB", error);
-            setIsLoading(false);
-        }}
-    else {
-            console.error('Product is not Selected')
-            setIsLoading(false);
+    console.log('error msg is : ' , JSON.stringify(errorMsg));
+    if (Object.keys(valid).length === 0) {
+       setIsLoading(true);
+      try {
+        const response = await api.post('/api/auth/Sale', reqSaleData, { headers });
+        console.log("data posted to DB", response);
+        notifyAddSale();
+        setSelectedProduct('');
+        setNumberOfItem('');
+        setPricePerItem('');
+        setDiscount('');
+        setIsLoading(false);
+      } catch (error) {
+        console.error("error posting data to DB", error);
+        setIsLoading(false);
+      }
+    } else {
+      setIsLoading(false);
     }
   }
  
   useEffect(()=>{
       fetchProduct();
       
-  },[])
+  },[]);
   const fetchProduct = async() =>{
     setIsLoading(true);
       try {
@@ -120,43 +124,40 @@ const SaleEntry = () => {
   const handleAddProduct = async(e) => {
       setErrorMsg({});
       const valid = {};
-      if (addProduct === '') {
+      if (addProduct.trim() === '') {
         valid.addProduct = "Please write the product name";
       }
       setErrorMsg(valid);
-      console.log('errorMsg is : ' , errorMsg)
-    setIsLoading(true);
       e.preventDefault(); 
-      try {
+      if (Object.keys(valid).length === 0) {
+        setIsLoading(true);
+        try {
           const response = await api.post('/api/auth/product', reqData , {headers});
           console.log("data posted to DB", response);
           setProductName([...productName, addProduct]);
           notifyAddProduct();
           setAddProduct('');
           setIsLoading(false);
-      }
-      catch(error) {
+          } catch(error) {
           console.error("error posting data to DB", error);
           setIsLoading(false);
-      }
+          }
+        }
+        else {
+          setIsLoading(false);
+        }
+
   }
 
   const handleDelete = async() => {
-    setIsLoading(true);
     setErrorMsg({});
     const valid = {};
     if (selectedProduct === '') {
       valid.selectedProduct = "Please select a product";
-      setIsLoading(false);
     }
     setErrorMsg(valid);
-    const token = localStorage.getItem('token'); 
-    
-    const headers = {
-      Authorization: token,
-      
-    };
     if (selectedProduct !== '') {
+      setIsLoading(true);
           try {
             const response = await api.delete('/api/auth/product', {data:{ProductName: selectedProduct} , headers: headers});
             console.log("Product deleted", response);
@@ -197,12 +198,12 @@ const SaleEntry = () => {
           <h1>Your Sales Entry</h1>
           <div className='container2'>
             <div className='container3'> 
-              <input style = {{width: '170px', marginRight:'5px'}}  className='SRinput' type='text' value={addProduct} onChange={(e)=>(setAddProduct(e.target.value))}></input>
+              <input style = {{width: '170px', marginRight:'5px'}}  className='SRinput' type='text' value={addProduct} onChange={(e)=>{(setAddProduct(e.target.value)); setErrorMsg({});}}></input>
               <button className='button' onClick={handleAddProduct} style = {{width: '120px'}} >Add Product</button>
             </div>
             {errorMsg.addProduct && <span className='error'>{errorMsg.addProduct}</span>}
             <div className='container3'>
-              <select style = {{width: '185px' , marginRight:'5px'}} className='SRinput' onChange={(e)=>{setSelectedProduct(e.target.value);setSaleDatail(initialSaleDetail);setErrorMsg({})}} value={selectedProduct} name="productName" id="productName">
+              <select style = {{width: '185px' , marginRight:'5px'}} className='SRinput' onChange={(e)=>{setSelectedProduct(e.target.value);setErrorMsg({})}} value={selectedProduct} name="productName" id="productName">
               <option value=''>Select Product</option>
                   {productName.map((prod,index) => (
                   <option value={prod} key={index}>{prod}</option>
@@ -213,12 +214,16 @@ const SaleEntry = () => {
             {errorMsg.selectedProduct&& <span className='error'>{errorMsg.selectedProduct}</span>}
           </div>
           <div className='container2'>
-                <input className='SRinput' type='number' min={0} placeholder='Number Of Items' name='NumberOfItem' value = {saleDetail.NumberOfItems} onChange={handleSaleChange} ></input>
+                <input className='SRinput' type='number' min={0} placeholder='Number Of Items' name='NumberOfItem' value = {numberOfItem} onChange={(e) => {setNumberOfItem(e.target.value); setErrorMsg({})}} ></input>
                 {errorMsg.NumberOfItem && <span className='error'>{errorMsg.NumberOfItem}</span>}
-                <input className='SRinput' type='number' min={0} placeholder='Price Per Item' name='PricePerItem' value = {saleDetail.PricePerItem} onChange={handleSaleChange} ></input>
+                {errorMsg.NumberOfItemError && <span className='error'>{errorMsg.NumberOfItemError}</span>}
+                <input className='SRinput' type='number' min={0} placeholder='Price Per Item' name='PricePerItem' value = {pricePerItem} onChange={(e)=>{setPricePerItem(e.target.value); setErrorMsg({})}} ></input>
                 {errorMsg.PricePerItem && <span className='error'>{errorMsg.PricePerItem}</span>}
-                <input className='SRinput' type='number' min={0} placeholder='Discount' name='discount' value = {saleDetail.discount} onChange={handleSaleChange} ></input>
+                {errorMsg.PricePerItemError && <span className='error'>{errorMsg.PricePerItemError}</span>}
+                <input className='SRinput' type='number' min={0} placeholder='Discount' name='discount' value = {discount} onChange={(e) => {setDiscount(e.target.value); setErrorMsg({})}} ></input>
                 {errorMsg.discount && <span className='error'>{errorMsg.discount}</span>}
+                {errorMsg.discountError && <span className='error'>{errorMsg.discountError}</span>}
+                {errorMsg.discountError1 && <span className='error'>{errorMsg.discountError1}</span>}
                 <button className='button' onClick={handleSale}>Add Sale</button> 
                 <Link to='/SaleRecord'><button className='button'>Record</button></Link>
           </div>  

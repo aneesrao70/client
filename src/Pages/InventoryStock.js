@@ -16,6 +16,7 @@ const InventoryStock = () => {
         const [productSale, setProductSale] = useState({});
         const [isLoading , setIsLoading] = useState(true);
         const [errorMsg, setErrorMsg] = useState({});
+        const [updater, setUpdater] = useState(false);
 
         const notifyAddInventory = () => toast.success("Success, Inventory is added.");
 
@@ -23,15 +24,14 @@ const InventoryStock = () => {
             fetchProduct();
             fetchSaleData();
             fetchInventoryData();
+            console.log('updater is:' , updater);
 
-        }, []);
+        }, [updater]);
         const currentDate = new Date();
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1; // Months are 0-indexed, so add 1
   const day = currentDate.getDate();
   const localDateString = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
-
-        console.log("productSale are:" , productSale)
         const token = localStorage.getItem('token'); 
         const userId = localStorage.getItem('userId');
         const headers = {
@@ -67,7 +67,6 @@ const InventoryStock = () => {
                     const response = await api.get('/api/auth/Sale', { 
                       headers : headers
                     });
-                    console.log('sales are', response.data.sales);
                     const result = await response.data.sales;
                     const SalesData = await result.map((product) => product);
                     setSaleDet(SalesData)
@@ -99,7 +98,6 @@ const InventoryStock = () => {
             }
 
         const addtoStockHandler = async() => {
-            setIsLoading(true);
             const valid = {};
             if(selectedProduct === '') {
               valid.selectedProduct = "Please select a product";
@@ -107,17 +105,12 @@ const InventoryStock = () => {
             if (numberOfItems === '') {
               valid.numberOfItems = "Enter Quantity please ";
             }
+            if (numberOfItems < 1 ) {
+              valid.numberOfItemsError = "Quantity should be more than zero"
+            }
             setErrorMsg(valid);
-  
-            const token = localStorage.getItem('token'); 
-            const userId = localStorage.getItem('userId');
-
-            const headers = {
-              Authorization: token,
-              'user-id': userId,
-            };
-
-            try {
+            if (Object.keys(valid).length === 0) {
+              try {
                 const response = await api.post('/api/auth/inventory', reqData, {
                     headers: headers,
                   });
@@ -127,41 +120,37 @@ const InventoryStock = () => {
                 setSelectedProduct('');
                 setNumberOfItems('');
                 setIsLoading(false);
-
-            } catch (error) {
+                setUpdater(!updater);
+               } catch (error) {
                 console.log('error adding inventory', error)
                 setIsLoading(false);
+              }
+            }
+            else {
+              setIsLoading(false);
             }
         }
-    
-    
 
-    // Calculate the total sold items for each product
-const productSales = saleDet.reduce((acc, sale) => {
-    const { ProductName, NumberOfItem } = sale;
-    acc[ProductName] = (acc[ProductName] || 0) + NumberOfItem;
-    return acc;
-  }, {});
-  
-  // Calculate the total items added to inventory for each product
-  const productInventory = inventoryData.reduce((acc, inventory) => {
-    const { ProductName, NumberOfItem } = inventory;
-    acc[ProductName] = (acc[ProductName] || 0) + NumberOfItem;
-    return acc;
-  }, {});
-  
-  // Calculate the remaining items for each product
-  const productRemaining = {};
-  console.log(productSales);
-  console.log(productInventory);
-  for (const product in productInventory) {
-    productRemaining[product] = productInventory[product] - (productSales[product] || 0);
-  }
-  
+      const productSales = saleDet.reduce((acc, sale) => {
+        const { ProductName, NumberOfItem } = sale;
+        acc[ProductName] = (acc[ProductName] || 0) + NumberOfItem;
+        return acc;
+      }, {});
+   
+      
+      // Calculate the total items added to inventory for each product
+      const productInventory = inventoryData.reduce((acc, inventory) => {
+        const { ProductName, NumberOfItem } = inventory;
+        acc[ProductName] = (acc[ProductName] || 0) + NumberOfItem;
+        return acc;
+      }, {}); 
 
-
-
-
+      
+      // Calculate the remaining items for each product
+      const productRemaining = {};
+      for (const product in productInventory) {
+        productRemaining[product] = productInventory[product] - (productSales[product] || 0);
+      }
 
   return (
     <div>
@@ -193,6 +182,7 @@ const productSales = saleDet.reduce((acc, sale) => {
                 </div>
                 <div>{errorMsg.selectedProduct && <span className='error'>{errorMsg.selectedProduct}</span>}</div>
                 <div>{errorMsg.numberOfItems && <span className='error'>{errorMsg.numberOfItems}</span>}</div>
+                <div>{errorMsg.numberOfItemsError && <span className='error'>{errorMsg.numberOfItemsError}</span>}</div>
                 <button className='button' onClick={addtoStockHandler}  style = {{textAlign: 'center' , width: '120px'}} >Add to Stock</button> 
                 <Link to='/InventoryRecord'><button className='button' style={{width: '120px'}}>Stock Record</button></Link>
             </div>
