@@ -153,7 +153,7 @@ console.log('current items aare: ' , currentItems)
       </div>
     </div>)}
     <div className = {`Table-container  ${isLoading ? 'loading' : ''}`}>
-    <h1>Your Inventory Details</h1>
+    <h1 className='mobile-heading'>Your Inventory Details</h1>
     <div className='Table-input-container'>
       <div className='input-btn'>
         <input style={{paddingLeft:'0' , textAlign:'center' , fontSize: '15px' , width: '180px'}} className='SRinput' type="text" name = 'prodName' value = {prodName} placeholder = 'Search by Product' onChange={(e)=>setProdName(e.target.value)}></input>

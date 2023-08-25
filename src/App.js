@@ -21,7 +21,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
 
-  useEffect(() => {
+/*   useEffect(() => {
     // Check if the user is logged in
     const token = localStorage.getItem('token');
     if (token) {
@@ -40,7 +40,7 @@ function App() {
     return () => {
       window.removeEventListener('beforeunload', clearLocalStorageOnExit);
     };
-  }, []);
+  }, []); */
 
  
 

@@ -20,6 +20,10 @@
     justify-content: flex-end;
 
 }
+h1 {
+  color: white;
+  text-shadow: 1px 1px 4px black;
+}
 
 
 
@@ -46,6 +50,10 @@ a {
 
 
 @media (max-width: 800px) {
+
+    .mobile-heading {
+      margin-top: 10px !important;
+    }
 
     .navbar-container {
         width: 100%;

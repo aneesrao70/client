@@ -6,9 +6,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Bars } from  'react-loader-spinner'
 import { AiFillCaretLeft , AiFillCaretRight , AiFillDelete } from 'react-icons/ai';
 
-
-
-
 const SaleRecord = () => {
 
   const [saleDet, setSaleDet] = useState([]);
@@ -19,8 +16,22 @@ const SaleRecord = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [isLoading , setIsLoading] = useState(true);
+  const [showPopup, setShowPopup] = useState(false);
+  const [clientName, setClientName] = useState('');
+  const [clientPhone, setClientPhone] = useState('');
+  const [paymentCheck , setPaymentCheck] = useState('');
+  const [morePayment, setMorePayment] = useState('');
+  const [rowId, setRowId] = useState('');
+  const [totalAmount , setTotalAmount] = useState('');
+  const [updater, setUpdater] = useState(false);
+
+
+
+
 
   const notifyDeleteSale = () => toast.success("Success, Sale is deleted.");
+  const notifyUpdated = () => toast.success("Payment is updated.");
+
 
 
   const removeFilters = () => {
@@ -73,9 +84,16 @@ const SaleRecord = () => {
       setEndDate(localDateString);
     }
 
+    const token = localStorage.getItem('token'); 
+    const userId = localStorage.getItem('userId');
+    const headers = {
+      Authorization: token,
+      'user-id': userId,
+    };
+
   useEffect(()=>{
     fetchData();
-  },[prodName,startDate,endDate,filterParam])
+  },[prodName,startDate,endDate,filterParam , updater])
 
   const fetchData = async()=> {
     setIsLoading(true);
@@ -125,6 +143,51 @@ const SaleRecord = () => {
         }
       }
 
+
+
+const checkData = {
+  PaymentCheck : morePayment,
+  _id : rowId
+}
+
+const handlePaymentCheck = async() => {
+  setPaymentCheck(morePayment)
+  setIsLoading(true);
+  const token = localStorage.getItem('token'); 
+  const userId = localStorage.getItem('userId');
+  const headers = {
+    Authorization: token,
+    'user-id': userId,
+  };
+  try {
+    const response = await api.put('/api/auth/Sale', checkData , {
+      headers : headers,
+    });
+    console.log('Payment status is updated:', response.data);
+    notifyUpdated();
+
+    setIsLoading(false);
+    setUpdater(!updater);
+
+    const updatedSaleDet = saleDet.map((sale) => {
+      if (sale._id === rowId) {
+        sale.PaymentCheck = checkData.morePayment;
+      }
+      return sale;
+    });   
+    setSaleDet(updatedSaleDet);
+    setMorePayment('');
+    setRowId('');
+    setTotalAmount(''); setClientName(''); setClientPhone('') ; setMorePayment('');
+  } catch (error) {
+    console.error('Error updating the status:', error);
+    setIsLoading(false);
+  }
+
+}
+
+
+
         
 
 
@@ -139,6 +202,23 @@ const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 // Get the current items to be displayed
 const currentItems = saleDet.slice(indexOfFirstItem, indexOfLastItem);
 console.log('current items aare: ' , currentItems)
+
+function getBackgroundColor(payment , total) {
+  if (total === payment) {
+      return '#Cdf5a5';
+  }
+  if (payment > 0 & payment < total) {
+      return '#F9f1c4';
+  }
+  if (payment === 0) {
+      return '#Fbabab';
+  }
+  return 'white'; // Default color if payment value doesn't match any of the above
+}
+
+const handleclose = () => {
+  setTotalAmount(''); setClientName(''); setClientPhone(''); setShowPopup(false) ; setMorePayment('');
+}
 
   return (
     <div>
@@ -155,8 +235,9 @@ console.log('current items aare: ' , currentItems)
         />
         </div>
       </div>)}
+      <div className={showPopup ? 'background' : ''}>
       <div className = {`Table-container  ${isLoading ? 'loading' : ''}`}>
-      <h1>Sales Details</h1>
+      <h1 className='mobile-heading'>Sales Details</h1>
       <div className='Table-input-container'>
         <div className='input-btn'>
           <input style={{paddingLeft:'0' , textAlign:'center' , fontSize: '15px' , width: '180px'}} className='SRinput' type="text" name = 'prodName' value = {prodName} placeholder = 'Search by Product' onChange={(e)=>setProdName(e.target.value)}></input>
@@ -198,7 +279,16 @@ console.log('current items aare: ' , currentItems)
       </thead>
           <tbody style = {{backgroundColor: 'white'}}>
               {currentItems.map((sale)=>(
-                  <tr key={sale._id}>
+                  <tr   key={sale._id} style={{ backgroundColor: getBackgroundColor(sale.PaymentCheck,sale.TotalPrice) }}
+                      onClick={()=>{
+                        setShowPopup(true);
+                        setClientName(sale.ClientName);
+                        setClientPhone(sale.ClientPhone); 
+                        setPaymentCheck(sale.PaymentCheck);
+                        setTotalAmount(sale.TotalPrice);
+                        setRowId(sale._id);
+                      }}
+                  >
                       <td>{sale.ProductName}</td>
                       <td>{sale.NumberOfItem}</td>
                       <td>{sale.PricePerItem}</td>
@@ -226,19 +316,36 @@ console.log('current items aare: ' , currentItems)
         <span style = {{margin: 'auto 30px' , fontSize:'20px'}}>Page {currentPage}</span>
         <button style={{width: '30px' , boxShadow:'none' , color: 'green' , backgroundColor: 'white'}} className='button icon-btn' onClick={() => setCurrentPage(currentPage + 1)} disabled={indexOfLastItem >= saleDet.length}><AiFillCaretRight/></button>
       </div>
-    </div>
-    <ToastContainer
-    position="top-center"
-    autoClose={2000}
-    hideProgressBar={false}
-    newestOnTop={false}
-    closeOnClick={false}
-    rtl={false}
-    pauseOnFocusLoss
-    draggable
-    pauseOnHover
-    theme="colored"
-        />
+      </div>
+      
+      </div>
+
+        { showPopup && 
+          <div className='popup-container'>
+            <div className='popup'><h4 style={{margin: '0px'}}>Customer Name:  {clientName ? clientName : 'Not Provided'}</h4></div>
+            <div className='popup'><h4 style={{margin: '0px'}}>Contact Number: {clientPhone ? clientPhone : 'Not Provided'}</h4></div>
+            <div className='popup'><h4 style={{margin: '0px'}}>Payment Recieved: {paymentCheck ? paymentCheck : 'Not Provided'}</h4></div>
+            <div className='popup'><h4 style={{margin: '0px'}}>Payment Remaining: {totalAmount - paymentCheck > 0 ? totalAmount - paymentCheck : '0'}</h4></div>
+            <div className='popup2'>
+            <div className='popup'><input style = {{width: '200px' , textAlign: 'center' ,  margin: 'auto' }} class='SRinput' placeholder='Update Recieved Payment' name = "morePayment" value = {morePayment} onChange={(e)=>setMorePayment(e.target.value)}></input></div>
+            <button onClick= {handlePaymentCheck}>Update</button>
+            <button onClick= {handleclose}>Close</button>
+            </div>
+            
+          </div>       
+        }
+      <ToastContainer
+      position="top-center"
+      autoClose={2000}
+      hideProgressBar={true}
+      newestOnTop={false}
+      closeOnClick={false}
+      rtl={false}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+      theme="colored"
+          />
   </div>
     
 

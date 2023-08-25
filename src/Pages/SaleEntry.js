@@ -17,6 +17,9 @@ const SaleEntry = () => {
   const [discount , setDiscount] = useState('');
   const [isLoading , setIsLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState({});
+  const [clientName, setClientName] = useState('');
+  const [clientPhone , setClientPhone] = useState('');
+  const [paymentCheck, setPaymentCheck] = useState('');
 
   const notifyAddProduct = () => toast.success("Success, Product is added.");
   const notifyDeleteProduct = () => toast.success("Success, Product is deleted.");
@@ -39,7 +42,10 @@ const SaleEntry = () => {
       discount: numberOfItem * pricePerItem > discount ? discount : numberOfItem * pricePerItem,
       TotalPrice : numberOfItem * pricePerItem - (numberOfItem * pricePerItem > discount ? discount : numberOfItem * pricePerItem),
       Timestamp : localDateString,
-      ProductName : selectedProduct
+      ProductName : selectedProduct,
+      ClientName : clientName,
+      ClientPhone : clientPhone,
+      PaymentCheck : paymentCheck
   }
 
 
@@ -71,6 +77,9 @@ const SaleEntry = () => {
     if (discount > (numberOfItem < 0 ? -numberOfItem : numberOfItem) * (pricePerItem < 0 ? -pricePerItem : pricePerItem)) {
       valid.discountError = `Discount can not be more than ${numberOfItem * pricePerItem}`;
     }
+    if (paymentCheck < 0) {
+      valid.paymentCheckError = "This can not be negative";
+    }
     setErrorMsg(valid);
     e.preventDefault(); 
     console.log('error msg is : ' , JSON.stringify(errorMsg));
@@ -85,6 +94,9 @@ const SaleEntry = () => {
         setPricePerItem('');
         setDiscount('');
         setIsLoading(false);
+        setClientName('');
+        setClientPhone('');
+        setPaymentCheck('');
       } catch (error) {
         console.error("error posting data to DB", error);
         setIsLoading(false);
@@ -195,7 +207,7 @@ const SaleEntry = () => {
           </div>
       </div>)}
       <div className = {`container-1  ${isLoading ? 'loading' : ''}`}>
-          <h1>Your Sales Entry</h1>
+          <h1 className='mobile-heading'>Your Sales Entry</h1>
           <div className='container2'>
             <div className='container3'> 
               <input style = {{width: '170px', marginRight:'5px'}}  className='SRinput' type='text' value={addProduct} onChange={(e)=>{(setAddProduct(e.target.value)); setErrorMsg({});}}></input>
@@ -224,6 +236,10 @@ const SaleEntry = () => {
                 {errorMsg.discount && <span className='error'>{errorMsg.discount}</span>}
                 {errorMsg.discountError && <span className='error'>{errorMsg.discountError}</span>}
                 {errorMsg.discountError1 && <span className='error'>{errorMsg.discountError1}</span>}
+                <input className='SRinput' type='text' placeholder='Customer Name (Optional)' name='clientName' value = {clientName} onChange={(e) => {setClientName(e.target.value); setErrorMsg({})}} ></input>
+                <input className='SRinput' type="tel" id="phone" placeholder="03XX-XXXXXXX (Optional)" pattern="03[0-9]{2}-[0-9]{7}" name='clientPhone' value = {clientPhone} onChange={(e) => {setClientPhone(e.target.value); setErrorMsg({})}} ></input>
+                <input className='SRinput' type='number' min={0} placeholder='Total Payment Recieved' name='paymentCheck' value = {paymentCheck} onChange={(e)=>{setPaymentCheck(e.target.value); setErrorMsg({})}} ></input>
+                {errorMsg.paymentCheckError && <span className='error'>{errorMsg.paymentCheckError}</span>}
                 <button className='button' onClick={handleSale}>Add Sale</button> 
                 <Link to='/SaleRecord'><button className='button'>Record</button></Link>
           </div>  

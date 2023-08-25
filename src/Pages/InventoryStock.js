@@ -170,7 +170,7 @@ const InventoryStock = () => {
     <div  className={`container-1  ${isLoading ? 'loading' : ''}`}>
         <div style={{marginBottom : '0'}} className='container2'>
             <div className='container4'>
-            <h1>Enter Inventory</h1>
+            <h1 className='mobile-heading'>Enter Inventory</h1>
                 <div className='container5'>
                     <select style = {{textAlign: 'center' , width: '200px' , marginRight:'5px'}} className='SRinput' onChange={(e)=>{setSelectedProduct(e.target.value); setErrorMsg({});}} value={selectedProduct} name="productName" id="productName">
                     <option value=''>Select Product</option>
