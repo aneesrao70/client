@@ -178,6 +178,7 @@ const handlePaymentCheck = async() => {
     setSaleDet(updatedSaleDet);
     setMorePayment('');
     setRowId('');
+    setShowPopup(false);
   } catch (error) {
     console.error('Error updating the status:', error);
     setIsLoading(false);
