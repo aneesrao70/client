@@ -295,7 +295,7 @@ const handleclose = () => {
                       <td>{sale.discount}</td>
                       <td>{sale.TotalPrice}</td>
                       <td>{sale.Timestamp}</td>
-                      <td onClick={() => handleDelete(sale._id)} className='icon-btn delete-btn'><AiFillDelete/></td>
+                      <td onClick={(e) =>{ e.stopPropagation();handleDelete(sale._id)}} className='icon-btn delete-btn'><AiFillDelete/></td>
                   </tr>
                ))}
           </tbody>  
@@ -328,7 +328,7 @@ const handleclose = () => {
             <div className='popup'><h4 style={{margin: '0px'}}>Payment Remaining: {totalAmount - paymentCheck > 0 ? totalAmount - paymentCheck : '0'}</h4></div>
             <div className='popup2'>
             <div className='popup'><input style = {{width: '200px' , textAlign: 'center' ,  margin: 'auto' }} class='SRinput' placeholder='Update Recieved Payment' name = "morePayment" value = {morePayment} onChange={(e)=>setMorePayment(e.target.value)}></input></div>
-            <button onClick= {handlePaymentCheck}>Update</button>
+            <button onClick= {handlePaymentCheck}>Update and Close</button>
             <button onClick= {handleclose}>Close</button>
             </div>
             
