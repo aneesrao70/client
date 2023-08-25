@@ -178,7 +178,6 @@ const handlePaymentCheck = async() => {
     setSaleDet(updatedSaleDet);
     setMorePayment('');
     setRowId('');
-    setTotalAmount(''); setClientName(''); setClientPhone('') ; setMorePayment('');
   } catch (error) {
     console.error('Error updating the status:', error);
     setIsLoading(false);
