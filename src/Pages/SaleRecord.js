@@ -24,6 +24,7 @@ const SaleRecord = () => {
   const [rowId, setRowId] = useState('');
   const [totalAmount , setTotalAmount] = useState('');
   const [updater, setUpdater] = useState(false);
+  const [error, setError] = useState('');
 
 
 
@@ -152,37 +153,44 @@ const checkData = {
 
 const handlePaymentCheck = async() => {
   setPaymentCheck(morePayment)
-  setIsLoading(true);
   const token = localStorage.getItem('token'); 
   const userId = localStorage.getItem('userId');
   const headers = {
     Authorization: token,
     'user-id': userId,
   };
-  try {
-    const response = await api.put('/api/auth/Sale', checkData , {
-      headers : headers,
-    });
-    console.log('Payment status is updated:', response.data);
-    notifyUpdated();
-
-    setIsLoading(false);
-    setUpdater(!updater);
-
-    const updatedSaleDet = saleDet.map((sale) => {
-      if (sale._id === rowId) {
-        sale.PaymentCheck = checkData.morePayment;
-      }
-      return sale;
-    });   
-    setSaleDet(updatedSaleDet);
-    setMorePayment('');
-    setRowId('');
-    setShowPopup(false);
-  } catch (error) {
-    console.error('Error updating the status:', error);
-    setIsLoading(false);
+  const valid = {};
+  if (morePayment > totalAmount) {
+      valid.paymenterror = `Payment can not be more than ${totalAmount}`
   }
+  setError(valid);
+  if (Object.keys(valid).length === 0) {
+    setIsLoading(true);
+    try {
+      const response = await api.put('/api/auth/Sale', checkData , {
+        headers : headers,
+      });
+      console.log('Payment status is updated:', response.data);
+      notifyUpdated();
+      setIsLoading(false);
+      setUpdater(!updater);
+  
+      const updatedSaleDet = saleDet.map((sale) => {
+        if (sale._id === rowId) {
+          sale.PaymentCheck = checkData.morePayment;
+        }
+        return sale;
+      });   
+      setSaleDet(updatedSaleDet);
+      setMorePayment('');
+      setRowId('');
+      setShowPopup(false);
+    } catch (error) {
+      console.error('Error updating the status:', error);
+      setIsLoading(false);
+    }
+  }
+
 
 }
 
@@ -217,6 +225,7 @@ function getBackgroundColor(payment , total) {
 }
 
 const handleclose = () => {
+  setError('');
   setTotalAmount(''); setClientName(''); setClientPhone(''); setShowPopup(false) ; setMorePayment('');
 }
 
@@ -327,7 +336,8 @@ const handleclose = () => {
             <div className='popup'><h4 style={{margin: '0px'}}>Payment Recieved: {paymentCheck ? paymentCheck : 'Not Provided'}</h4></div>
             <div className='popup'><h4 style={{margin: '0px'}}>Payment Remaining: {totalAmount - paymentCheck > 0 ? totalAmount - paymentCheck : '0'}</h4></div>
             <div className='popup2'>
-            <div className='popup'><input style = {{width: '200px' , textAlign: 'center' ,  margin: 'auto' }} class='SRinput' placeholder='Update Recieved Payment' name = "morePayment" value = {morePayment} onChange={(e)=>setMorePayment(e.target.value)}></input></div>
+            <div className='popup'><input style = {{width: '200px' , textAlign: 'center' ,  margin: 'auto' }} class='SRinput' type='number' placeholder='Update Payment' name = "morePayment" value = {morePayment} onChange={(e)=>setMorePayment(e.target.value)}></input></div>
+            {error.paymenterror && <span style = {{ margin: '0.2px'}} className='error'>{error.paymenterror}</span>}
             <button onClick= {handlePaymentCheck}>Update and Close</button>
             <button onClick= {handleclose}>Close</button>
             </div>

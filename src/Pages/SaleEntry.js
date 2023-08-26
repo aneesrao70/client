@@ -80,6 +80,10 @@ const SaleEntry = () => {
     if (paymentCheck < 0) {
       valid.paymentCheckError = "This can not be negative";
     }
+    if (paymentCheck > ((numberOfItem* pricePerItem)-discount)) {
+      valid.paymentCheckError1 = `Recieved Payment can not be mote than ${(numberOfItem* pricePerItem)-discount}`;
+    }
+
     setErrorMsg(valid);
     e.preventDefault(); 
     console.log('error msg is : ' , JSON.stringify(errorMsg));
@@ -240,6 +244,7 @@ const SaleEntry = () => {
                 <input className='SRinput' type="tel" id="phone" placeholder="03XX-XXXXXXX (Optional)" pattern="03[0-9]{2}-[0-9]{7}" name='clientPhone' value = {clientPhone} onChange={(e) => {setClientPhone(e.target.value); setErrorMsg({})}} ></input>
                 <input className='SRinput' type='number' min={0} placeholder='Total Payment Recieved' name='paymentCheck' value = {paymentCheck} onChange={(e)=>{setPaymentCheck(e.target.value); setErrorMsg({})}} ></input>
                 {errorMsg.paymentCheckError && <span className='error'>{errorMsg.paymentCheckError}</span>}
+                {errorMsg.paymentCheckError1 && <span className='error'>{errorMsg.paymentCheckError1}</span>}
                 <button className='button' onClick={handleSale}>Add Sale</button> 
                 <Link to='/SaleRecord'><button className='button'>Record</button></Link>
           </div>  
@@ -247,7 +252,7 @@ const SaleEntry = () => {
         <ToastContainer
         position="top-center"
         autoClose={2000}
-        hideProgressBar={false}
+        hideProgressBar={true}
         newestOnTop={false}
         closeOnClick={false}
         rtl={false}
