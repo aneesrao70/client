@@ -43,7 +43,7 @@ const SignIn = ({isLoggedIn , setIsLoggedIn}) => {
               notify();
               setTimeout(() => {
                 History('/'); // Replace '/' with your homepage URL
-              }, 1000); 
+              }, 1600); 
           } else {
             setLoginSuccess(!loginSuccess);
               console.log('Login failed');
@@ -88,7 +88,8 @@ const SignIn = ({isLoggedIn , setIsLoggedIn}) => {
           {errorMsgPassword && <span className='error'>{errorMsgPassword}</span>}
           {loginFailure !== '' && <span className='error'>{loginFailure}</span>}
           <button className='button' onClick={handleLogin} >Sign In</button>
-          <h4 className = 'footing'>Already have an account? <Link to = "/Register"> Register</Link></h4>
+          <h5 style={{margin: '0'}}><Link to="/resetpassword">Forgot Password?</Link></h5>
+          <h4 style={{margin: '0'}} className = 'footing'>Already have an account? <Link to = "/Register"> Register</Link></h4>
           <ToastContainer
           position="top-center"
           autoClose={2000}

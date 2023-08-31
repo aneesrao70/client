@@ -17,9 +17,8 @@ const Register = () => {
     const [isLoading , setIsLoading] = useState(false);
     const [registerationSuccess,setRegisterationSuccess]=useState(false);
 
-    const Navigate = useNavigate();
 
-    const notifyRegistration = () => toast.success("Registration Successfull");
+    const notifyRegistration = () => toast.success("Registration Successfull, Check your email and verify to proceed.");
   
     const handleCheck = (e)=> {
       setIsChecked(e.target.checked);
@@ -83,9 +82,7 @@ const Register = () => {
           setIsLoading(false)
           
           setData({uname:'',email:'',password:'',confirmpassword:''});
-          setTimeout(() => {
-            Navigate("/login");
-          }, 1000);
+
         } catch (error){
           console.error('Error posting data:', error.response);
           if (error.response.status) {
@@ -145,7 +142,7 @@ const Register = () => {
      </div>
      <ToastContainer
      position="top-center"
-     autoClose={2000}
+     autoClose={4000}
      hideProgressBar={true}
      newestOnTop={false}
      closeOnClick={false}
